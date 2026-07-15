@@ -307,7 +307,37 @@ Testing was performed manually using API requests and application checks.
 Any bugs identified during testing were tracked through GitHub Issues.
 
 ---
+## Testing
 
+Manual testing was performed after integrating the completed features to verify that the application functions correctly.
+
+### Testing Areas
+
+The following features were tested:
+
+- User registration, login, and logout functionality
+- Adding, editing, and deleting transactions
+- Dashboard totals and financial summaries
+- Form validation for incorrect or missing inputs
+- Application stability and browser console errors
+
+### Testing Results
+
+| Test Case | Expected Result | Status |
+|---|---|---|
+| User registration | New user account is created successfully | Passed |
+| User login | User can log in with valid credentials | Passed |
+| User logout | User session is terminated successfully | Passed |
+| Add transaction | Transaction is saved and displayed correctly | Passed |
+| Edit transaction | Existing transaction updates correctly | Passed |
+| Delete transaction | Transaction is removed successfully | Passed |
+| Dashboard totals | Calculations match transaction data | Passed |
+| Form validation | Invalid inputs are rejected | Passed |
+| Console errors | No critical errors occur during usage | Passed |
+
+### Bug Reporting
+
+Any bugs identified during testing were documented using GitHub Issues and assigned to the responsible team member.
 # Known Limitations
 
 - Authentication and authorization were not completed due to time constraints.
@@ -318,6 +348,22 @@ Any bugs identified during testing were tracked through GitHub Issues.
 
 ---
 
+## Frequently Asked Questions (Q/A)
+
+### Q1. What is the purpose of this application?
+**A:** Expense & Budget Tracker allows users to record expenses, organize transactions by categories, and manage financial information.
+
+### Q2. What technologies are used in this project?
+**A:** The project uses HTML, CSS, JavaScript, Node.js, Express.js, and SQLite.
+
+### Q3. How is data stored in the application?
+**A:** Data is stored using an SQLite database containing users, categories, transactions, and budgets tables.
+
+### Q4. How was the application tested?
+**A:** The application was tested manually by checking user functionality, transaction operations, API responses, and database persistence.
+
+### Q5. What improvements are planned for the future?
+**A:** Future improvements include authentication, dashboard analytics, budget alerts, CSV/PDF export, and automated testing.
 # Future Improvements
 
 Potential future improvements include:
