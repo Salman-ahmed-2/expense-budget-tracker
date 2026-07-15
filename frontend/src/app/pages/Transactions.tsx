@@ -1,41 +1,72 @@
-import { useState } from "react";
-import { Search, Filter, ArrowUpRight, ArrowDownRight, Download, ChevronUp, ChevronDown } from "lucide-react";
-import { transactions } from "../data/mockData";
+import { useState, useEffect } from "react";
+import { Search, Filter, ArrowUpRight, ArrowDownRight, Download, ChevronUp, ChevronDown, Loader2, Trash2 } from "lucide-react";
+import { getTransactions, getCategories, deleteTransaction, type Transaction, type Category } from "../services/api";
 
-const categories = ["All", "Income", "Food & Dining", "Housing", "Transport", "Entertainment", "Healthcare", "Shopping", "Utilities", "Education"];
 const statuses = ["All", "completed", "pending"];
 
 export default function Transactions() {
+  const [transactions, setTransactions] = useState<Transaction[]>([]);
+  const [categories, setCategories] = useState<Category[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState("");
   const [search, setSearch] = useState("");
   const [category, setCategory] = useState("All");
-  const [status, setStatus] = useState("All");
   const [type, setType] = useState("All");
   const [sort, setSort] = useState<{ key: string; dir: "asc" | "desc" }>({ key: "date", dir: "desc" });
   const [page, setPage] = useState(1);
   const perPage = 8;
 
+  async function fetchData() {
+    try {
+      const [txData, catData] = await Promise.all([
+        getTransactions(),
+        getCategories(),
+      ]);
+      setTransactions(txData);
+      setCategories(catData);
+    } catch (err: any) {
+      setError(err.message);
+    } finally {
+      setLoading(false);
+    }
+  }
+
+  useEffect(() => {
+    fetchData();
+  }, []);
+
+  async function handleDelete(id: number) {
+    try {
+      await deleteTransaction(id);
+      setTransactions(prev => prev.filter(t => t.id !== id));
+    } catch (err: any) {
+      alert("Failed to delete: " + err.message);
+    }
+  }
+
+  const categoryNames = ["All", ...categories.map(c => c.name)];
+
   const filtered = transactions
     .filter(t => {
-      if (search && !t.name.toLowerCase().includes(search.toLowerCase()) && !t.category.toLowerCase().includes(search.toLowerCase())) return false;
-      if (category !== "All" && t.category !== category) return false;
-      if (status !== "All" && t.status !== status) return false;
-      if (type === "income" && t.type !== "income") return false;
-      if (type === "expense" && t.type !== "expense") return false;
+      if (search && !t.description?.toLowerCase().includes(search.toLowerCase()) && !t.category_name?.toLowerCase().includes(search.toLowerCase())) return false;
+      if (category !== "All" && t.category_name !== category) return false;
+      if (type === "income" && t.type?.toLowerCase() !== "income") return false;
+      if (type === "expense" && t.type?.toLowerCase() !== "expense") return false;
       return true;
     })
     .sort((a, b) => {
       const dir = sort.dir === "asc" ? 1 : -1;
       if (sort.key === "amount") return (Math.abs(a.amount) - Math.abs(b.amount)) * dir;
       if (sort.key === "date") return (a.date > b.date ? 1 : -1) * dir;
-      if (sort.key === "name") return a.name.localeCompare(b.name) * dir;
+      if (sort.key === "name") return (a.description || "").localeCompare(b.description || "") * dir;
       return 0;
     });
 
   const pages = Math.ceil(filtered.length / perPage);
   const paged = filtered.slice((page - 1) * perPage, page * perPage);
 
-  const totalIn = transactions.filter(t => t.type === "income").reduce((s, t) => s + t.amount, 0);
-  const totalOut = transactions.filter(t => t.type === "expense").reduce((s, t) => s + Math.abs(t.amount), 0);
+  const totalIn = transactions.filter(t => t.type?.toLowerCase() === "income").reduce((s, t) => s + t.amount, 0);
+  const totalOut = transactions.filter(t => t.type?.toLowerCase() === "expense").reduce((s, t) => s + t.amount, 0);
 
   function toggleSort(key: string) {
     setSort(s => s.key === key ? { key, dir: s.dir === "asc" ? "desc" : "asc" } : { key, dir: "desc" });
@@ -44,6 +75,28 @@ export default function Transactions() {
   function SortIcon({ col }: { col: string }) {
     if (sort.key !== col) return <ChevronUp size={12} className="opacity-20" />;
     return sort.dir === "asc" ? <ChevronUp size={12} className="text-emerald-400" /> : <ChevronDown size={12} className="text-emerald-400" />;
+  }
+
+  if (loading) {
+    return (
+      <div className="flex items-center justify-center h-full min-h-[400px]">
+        <div className="flex flex-col items-center gap-3">
+          <Loader2 className="w-8 h-8 text-emerald-400 animate-spin" />
+          <p className="text-slate-400 text-sm">Loading transactions...</p>
+        </div>
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="flex items-center justify-center h-full min-h-[400px]">
+        <div className="bg-red-500/10 border border-red-500/20 rounded-2xl p-8 text-center max-w-md">
+          <p className="text-red-400 font-semibold mb-2">Failed to load</p>
+          <p className="text-slate-400 text-sm">{error}</p>
+        </div>
+      </div>
+    );
   }
 
   return (
@@ -94,11 +147,7 @@ export default function Transactions() {
         </div>
 
         <select value={category} onChange={e => setCategory(e.target.value)} className="bg-white/[0.04] border border-white/[0.06] rounded-xl px-3 py-2 text-sm text-slate-300 focus:outline-none focus:ring-1 focus:ring-emerald-500/50 appearance-none">
-          {categories.map(c => <option key={c} value={c} className="bg-slate-800">{c}</option>)}
-        </select>
-
-        <select value={status} onChange={e => setStatus(e.target.value)} className="bg-white/[0.04] border border-white/[0.06] rounded-xl px-3 py-2 text-sm text-slate-300 focus:outline-none focus:ring-1 focus:ring-emerald-500/50 appearance-none">
-          {statuses.map(s => <option key={s} value={s} className="bg-slate-800 capitalize">{s === "All" ? "All Status" : s}</option>)}
+          {categoryNames.map(c => <option key={c} value={c} className="bg-slate-800">{c}</option>)}
         </select>
       </div>
 
@@ -111,50 +160,52 @@ export default function Transactions() {
                 { label: "Transaction", key: "name" },
                 { label: "Category", key: "category" },
                 { label: "Date", key: "date" },
-                { label: "Status", key: "status" },
                 { label: "Amount", key: "amount" },
+                { label: "", key: "actions" },
               ].map(col => (
                 <th
                   key={col.key}
-                  onClick={() => toggleSort(col.key)}
-                  className="text-left px-5 py-4 text-xs font-semibold text-slate-500 uppercase tracking-wider cursor-pointer hover:text-slate-300 transition-colors select-none"
+                  onClick={() => col.key !== "actions" && toggleSort(col.key)}
+                  className={`text-left px-5 py-4 text-xs font-semibold text-slate-500 uppercase tracking-wider ${col.key !== "actions" ? "cursor-pointer hover:text-slate-300" : ""} transition-colors select-none`}
                 >
-                  <span className="flex items-center gap-1">{col.label} <SortIcon col={col.key} /></span>
+                  <span className="flex items-center gap-1">{col.label} {col.key !== "actions" && <SortIcon col={col.key} />}</span>
                 </th>
               ))}
             </tr>
           </thead>
           <tbody className="divide-y divide-white/[0.03]">
-            {paged.map(t => (
-              <tr key={t.id} className="hover:bg-white/[0.02] transition-colors group">
-                <td className="px-5 py-3.5">
-                  <div className="flex items-center gap-3">
-                    <div className="w-8 h-8 rounded-xl flex items-center justify-center text-sm font-semibold shrink-0" style={{ backgroundColor: `${t.type === "income" ? "#10B981" : "#EF4444"}18` }}>
-                      {t.type === "income" ? "IN" : "EX"}
+            {paged.map(t => {
+              const isIncome = t.type?.toLowerCase() === "income";
+              return (
+                <tr key={t.id} className="hover:bg-white/[0.02] transition-colors group">
+                  <td className="px-5 py-3.5">
+                    <div className="flex items-center gap-3">
+                      <div className="w-8 h-8 rounded-xl flex items-center justify-center text-sm font-semibold shrink-0" style={{ backgroundColor: `${isIncome ? "#10B981" : "#EF4444"}18` }}>
+                        {isIncome ? "IN" : "EX"}
+                      </div>
+                      <div>
+                        <p className="text-slate-200 text-sm font-medium">{t.description || "Transaction"}</p>
+                      </div>
                     </div>
-                    <div>
-                      <p className="text-slate-200 text-sm font-medium">{t.name}</p>
-                      <p className="text-slate-600 text-xs">{t.merchant}</p>
-                    </div>
-                  </div>
-                </td>
-                <td className="px-5 py-3.5">
-                  <span className="text-xs px-2.5 py-1 rounded-lg bg-white/[0.05] text-slate-400 font-medium">{t.category}</span>
-                </td>
-                <td className="px-5 py-3.5 text-slate-400 text-sm font-mono">{t.date}</td>
-                <td className="px-5 py-3.5">
-                  <span className={`text-xs px-2.5 py-1 rounded-lg font-semibold ${t.status === "completed" ? "bg-emerald-500/10 text-emerald-400" : "bg-amber-500/10 text-amber-400"}`}>
-                    {t.status}
-                  </span>
-                </td>
-                <td className="px-5 py-3.5">
-                  <span className={`text-sm font-bold font-mono flex items-center gap-1 ${t.amount > 0 ? "text-emerald-400" : "text-slate-300"}`}>
-                    {t.amount > 0 ? <ArrowUpRight size={14} /> : <ArrowDownRight size={14} />}
-                    {t.amount > 0 ? "+" : ""}${Math.abs(t.amount).toFixed(2)}
-                  </span>
-                </td>
-              </tr>
-            ))}
+                  </td>
+                  <td className="px-5 py-3.5">
+                    <span className="text-xs px-2.5 py-1 rounded-lg bg-white/[0.05] text-slate-400 font-medium">{t.category_name || "—"}</span>
+                  </td>
+                  <td className="px-5 py-3.5 text-slate-400 text-sm font-mono">{t.date}</td>
+                  <td className="px-5 py-3.5">
+                    <span className={`text-sm font-bold font-mono flex items-center gap-1 ${isIncome ? "text-emerald-400" : "text-slate-300"}`}>
+                      {isIncome ? <ArrowUpRight size={14} /> : <ArrowDownRight size={14} />}
+                      {isIncome ? "+" : "-"}${Math.abs(t.amount).toFixed(2)}
+                    </span>
+                  </td>
+                  <td className="px-5 py-3.5">
+                    <button onClick={() => handleDelete(t.id)} className="opacity-0 group-hover:opacity-100 text-slate-500 hover:text-red-400 transition-all">
+                      <Trash2 size={14} />
+                    </button>
+                  </td>
+                </tr>
+              );
+            })}
           </tbody>
         </table>
 
@@ -165,16 +216,18 @@ export default function Transactions() {
         )}
 
         {/* Pagination */}
-        <div className="flex items-center justify-between px-5 py-4 border-t border-white/[0.06]">
-          <p className="text-slate-500 text-sm">Showing {(page - 1) * perPage + 1}–{Math.min(page * perPage, filtered.length)} of {filtered.length}</p>
-          <div className="flex gap-1">
-            <button onClick={() => setPage(p => Math.max(1, p - 1))} disabled={page === 1} className="px-3 py-1.5 rounded-lg text-xs text-slate-400 hover:text-white hover:bg-white/[0.05] disabled:opacity-30 disabled:cursor-not-allowed transition-all">← Prev</button>
-            {Array.from({ length: pages }, (_, i) => i + 1).map(p => (
-              <button key={p} onClick={() => setPage(p)} className={`w-8 h-8 rounded-lg text-xs font-medium transition-all ${page === p ? "bg-emerald-500 text-slate-900" : "text-slate-400 hover:text-white hover:bg-white/[0.05]"}`}>{p}</button>
-            ))}
-            <button onClick={() => setPage(p => Math.min(pages, p + 1))} disabled={page === pages} className="px-3 py-1.5 rounded-lg text-xs text-slate-400 hover:text-white hover:bg-white/[0.05] disabled:opacity-30 disabled:cursor-not-allowed transition-all">Next →</button>
+        {pages > 0 && (
+          <div className="flex items-center justify-between px-5 py-4 border-t border-white/[0.06]">
+            <p className="text-slate-500 text-sm">Showing {(page - 1) * perPage + 1}–{Math.min(page * perPage, filtered.length)} of {filtered.length}</p>
+            <div className="flex gap-1">
+              <button onClick={() => setPage(p => Math.max(1, p - 1))} disabled={page === 1} className="px-3 py-1.5 rounded-lg text-xs text-slate-400 hover:text-white hover:bg-white/[0.05] disabled:opacity-30 disabled:cursor-not-allowed transition-all">← Prev</button>
+              {Array.from({ length: pages }, (_, i) => i + 1).map(p => (
+                <button key={p} onClick={() => setPage(p)} className={`w-8 h-8 rounded-lg text-xs font-medium transition-all ${page === p ? "bg-emerald-500 text-slate-900" : "text-slate-400 hover:text-white hover:bg-white/[0.05]"}`}>{p}</button>
+              ))}
+              <button onClick={() => setPage(p => Math.min(pages, p + 1))} disabled={page === pages} className="px-3 py-1.5 rounded-lg text-xs text-slate-400 hover:text-white hover:bg-white/[0.05] disabled:opacity-30 disabled:cursor-not-allowed transition-all">Next →</button>
+            </div>
           </div>
-        </div>
+        )}
       </div>
     </div>
   );

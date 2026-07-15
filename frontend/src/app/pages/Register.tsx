@@ -2,6 +2,8 @@ import { useState } from "react";
 import { Link, useNavigate } from "react-router";
 import { Mail, Lock, Eye, EyeOff, User, ArrowRight, CheckCircle2 } from "lucide-react";
 
+import { register } from "../services/api";
+
 const perks = [
   "Unlimited transaction tracking",
   "Smart budgeting with AI insights",
@@ -13,16 +15,24 @@ export default function Register() {
   const [form, setForm] = useState({ name: "", email: "", password: "" });
   const [showPw, setShowPw] = useState(false);
   const [loading, setLoading] = useState(false);
+  const [error, setError] = useState("");
   const navigate = useNavigate();
 
   const strength = form.password.length === 0 ? 0 : form.password.length < 6 ? 1 : form.password.length < 10 ? 2 : 3;
   const strengthLabel = ["", "Weak", "Good", "Strong"][strength];
   const strengthColor = ["", "bg-red-500", "bg-amber-400", "bg-emerald-500"][strength];
 
-  function handleSubmit(e: React.FormEvent) {
+  async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
     setLoading(true);
-    setTimeout(() => navigate("/"), 1200);
+    setError("");
+    try {
+      await register(form);
+      navigate("/");
+    } catch (err: any) {
+      setError(err.message || "Failed to register");
+      setLoading(false);
+    }
   }
 
   return (
@@ -40,6 +50,12 @@ export default function Register() {
           </div>
         ))}
       </div>
+
+      {error && (
+        <div className="mb-4 bg-red-500/10 border border-red-500/20 rounded-xl p-3 text-red-400 text-sm">
+          {error}
+        </div>
+      )}
 
       <form onSubmit={handleSubmit} className="space-y-4">
         <div>

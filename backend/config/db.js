@@ -4,6 +4,7 @@ const fs = require('fs');
 
 const dbPath = path.resolve(__dirname, '../../database/expense_tracker.db');
 const schemaPath = path.resolve(__dirname, '../../database/schema.sql');
+const seedPath = path.resolve(__dirname, '../../database/seed.sql');
 
 const db = new sqlite3.Database(dbPath, (err) => {
   if (err) {
@@ -11,7 +12,10 @@ const db = new sqlite3.Database(dbPath, (err) => {
   } else {
     console.log('Connected to the SQLite database.');
 
-    // Check if tables exist, if not, run schema
+    // Enable WAL mode for better concurrent access
+    db.run('PRAGMA journal_mode=WAL');
+
+    // Check if tables exist, if not, run schema and seed
     db.get("SELECT name FROM sqlite_master WHERE type='table' AND name='transactions'", (err, row) => {
       if (err) {
         console.error('Error checking for tables:', err.message);
@@ -25,6 +29,17 @@ const db = new sqlite3.Database(dbPath, (err) => {
             console.error('Error executing schema:', err.message);
           } else {
             console.log('Database schema initialized.');
+            // Seed data
+            if (fs.existsSync(seedPath)) {
+              const seed = fs.readFileSync(seedPath, 'utf8');
+              db.exec(seed, (err) => {
+                if (err) {
+                  console.error('Error seeding database:', err.message);
+                } else {
+                  console.log('Database seeded with initial data.');
+                }
+              });
+            }
           }
         });
       } else {
