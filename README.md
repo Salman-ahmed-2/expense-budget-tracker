@@ -58,7 +58,15 @@ A small finance tracker for recording expenses, categories, monthly budgets, and
 
 ## Application Screenshots
 
-*Screenshots will be added after the application is completed.*
+### Login Page:
+The login page provides a clean interface for users to access the Expense & Budget Tracker.
+
+<img width="1537" height="763" alt="image" src="https://github.com/user-attachments/assets/5a77273d-715d-4181-8653-91f6482f3985" />
+
+### Dashboard:
+The dashboard displays an overview of the user's financial information, including total balance, monthly income, expenses, savings, recent transactions, and expense breakdown charts.
+
+<img width="1542" height="792" alt="image" src="https://github.com/user-attachments/assets/e3abacc0-ef1d-46c9-aab9-ec390c6990b4" />
 
 ---
 
