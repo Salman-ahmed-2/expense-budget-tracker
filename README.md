@@ -1,12 +1,15 @@
 # Expense & Budget Tracker
-### Project Idea 5
+## Project Idea 5
 
-A full-stack expense and budget tracking web application built using **HTML, CSS, JavaScript, Node.js, Express.js, and SQLite**. The application allows users to manage expenses, organize them into categories, set monthly budgets, and monitor spending through a simple and user-friendly interface.
+A full-stack expense tracking web application built using **HTML, CSS, JavaScript, Node.js, Express.js, and SQLite**.
 
-A small finance tracker for recording expenses, categories, monthly budgets, and spending summaries.
+The application allows users to record and manage transactions, organize expenses into categories, and store financial data using a database-backed system.
+
+This project was developed as part of **Assignment 3 — Mini Web Application with Database** for the **CODOC (PRIVATE) LIMITED Intern Development Programme**.
+
 ---
 
-## Team Members and Roles
+# Team Members and Roles
 
 | Name | Role |
 |------|------|
@@ -18,7 +21,7 @@ A small finance tracker for recording expenses, categories, monthly budgets, and
 
 ---
 
-## Technologies Used
+# Technologies Used
 
 | Category | Technologies |
 |----------|--------------|
@@ -29,46 +32,76 @@ A small finance tracker for recording expenses, categories, monthly budgets, and
 
 ---
 
-## Features
+# Features
 
-### Core Features
+## Completed Features
 
-*This section will be updated after development is completed.*
-
-### Bonus Features
-
-*This section will be updated if any bonus features are implemented.*
-
----
-
-## Application Screenshots
-
-### Login Page
-
-The login page provides users with a secure interface to access the application.
-
-<img width="1536" height="788" alt="image" src="https://github.com/user-attachments/assets/b91afaf1-61db-4fbf-83cf-f99800348a0d" />
-
-
----
-
-### Dashboard
-
-The dashboard provides an overview of balances, income, expenses, budgets, recent transactions, and financial insights.
-
-<img width="1537" height="793" alt="image" src="https://github.com/user-attachments/assets/3db7865b-da35-4c07-bef2-dcb68021a73e" />
-
-
+- SQLite database integration with persistent data storage
+- Database schema containing:
+  - Users
+  - Categories
+  - Transactions
+  - Budgets
+- Express.js backend connected with SQLite
+- REST API implementation for transactions
+- Transaction CRUD operations:
+  - Create transactions
+  - View transactions
+  - Update transactions
+  - Delete transactions
+- Database seed data for testing
+- Organized project structure with separate frontend, backend, and database folders
 
 ---
 
-## Database Schema
+## Features In Progress
 
-The application uses **SQLite** as its database. It stores user information, transaction categories, financial transactions, and monthly budgets.
+- Transaction management user interface
+- Search and filtering functionality
+- Client-side form validation
+- Additional frontend improvements
 
-### Database Tables
+---
 
-#### Users
+## Bonus Features
+
+The following bonus features were planned but not completed due to time constraints:
+
+- Budget exceeded alerts
+- Monthly financial reports
+- CSV/PDF transaction export
+- Advanced dashboard analytics
+- Additional visualizations
+
+---
+
+# Application Screenshots
+
+## Transaction Management Interface
+
+Screenshot showing the transaction management page and user interaction flow.
+
+<img width="1532" height="788" alt="image" src="https://github.com/user-attachments/assets/70289754-6ea1-4ef9-9c70-2017b8d0e52d" />
+
+## Reports Interface
+
+The reports interface demonstrates the planned financial summary layout, including income and expense comparisons and visual representations of transaction data.
+
+<img width="1537" height="797" alt="image" src="https://github.com/user-attachments/assets/9dad2082-1f78-4097-9b83-0f88829fdf1c" />
+
+---
+
+# Database Schema
+
+The application uses **SQLite** as its database.
+
+The database stores user information, transaction categories, financial transactions, and monthly budgets.
+
+## Database Tables
+
+---
+
+## Users
 
 Stores registered user information.
 
@@ -82,7 +115,7 @@ Stores registered user information.
 
 ---
 
-#### Categories
+## Categories
 
 Stores available income and expense categories.
 
@@ -93,9 +126,9 @@ Stores available income and expense categories.
 
 ---
 
-#### Transactions
+## Transactions
 
-Stores all income and expense records.
+Stores income and expense records.
 
 | Column | Type | Description |
 |--------|------|-------------|
@@ -109,9 +142,9 @@ Stores all income and expense records.
 
 ---
 
-#### Budgets
+## Budgets
 
-Stores monthly budget limits for each category.
+Stores monthly budget limits.
 
 | Column | Type | Description |
 |--------|------|-------------|
@@ -121,7 +154,9 @@ Stores monthly budget limits for each category.
 | month | TEXT | Budget month |
 | limit_amount | REAL | Monthly budget limit |
 
-### Database Relationships
+---
+
+# Database Relationships
 
 - One user can have multiple transactions.
 - One user can have multiple budgets.
@@ -130,12 +165,27 @@ Stores monthly budget limits for each category.
 
 ---
 
-## Database Setup
+# Database Setup
 
-1. Run the **schema.sql** file to create all database tables.
-2. Run the **seed.sql** file to populate the database with sample data.
+Navigate to the database folder:
 
-The seed data includes:
+```bash
+cd database
+```
+
+Create database tables:
+
+```bash
+sqlite3 expense_tracker.db < schema.sql
+```
+
+Insert sample data:
+
+```bash
+sqlite3 expense_tracker.db < seed.sql
+```
+
+The seed data contains:
 
 - Sample users
 - Categories
@@ -146,14 +196,15 @@ This allows the application to be tested immediately after setup.
 
 ---
 
-## Project Structure
+# Project Structure
 
-```text
+```
 expense-budget-tracker/
-├── client/          # Frontend files
-├── server/          # Backend files
-├── database/        # schema.sql and seed.sql
-├── docs/            # Screenshots and documentation
+
+├── frontend/          # Frontend files
+├── backend/           # Express server, APIs, controllers
+├── database/          # schema.sql and seed.sql
+├── docs/              # Screenshots and documentation
 ├── README.md
 ├── package.json
 └── .gitignore
@@ -161,41 +212,42 @@ expense-budget-tracker/
 
 ---
 
-## Installation & Setup
+# Installation & Setup
 
-### Clone the Repository
+## Clone the Repository
 
 ```bash
 git clone <repository-link>
 ```
 
-### Navigate to the Project Directory
+## Navigate to Project Directory
 
 ```bash
 cd expense-budget-tracker
 ```
 
-### Install Dependencies
+## Install Backend Dependencies
 
 ```bash
+cd backend
 npm install
 ```
 
-### Run the Application
+## Run Backend Server
 
 ```bash
 npm start
 ```
 
-> **Note:** These commands may be updated if the final project structure changes.
+The frontend can be accessed from the frontend directory.
 
 ---
 
-## GitHub Workflow Summary
+# GitHub Workflow Summary
 
-The project follows the GitHub collaboration workflow required by the CODOC Intern Development Programme.
+The project followed the required GitHub collaboration workflow:
 
-```text
+```
 Issue
    ↓
 Branch
@@ -211,36 +263,82 @@ Merge
 Issue Closed
 ```
 
-Examples of GitHub Issues, branches, commits, Pull Requests, reviews, and merges will be added after project completion.
+Workflow practices followed:
+
+- GitHub Issues were created before starting tasks.
+- Each task was developed on a separate branch.
+- Commits followed meaningful prefixes:
+  - feat:
+  - fix:
+  - docs:
+  - chore:
+- Pull Requests were created before merging changes.
+- Pull Requests were reviewed by team members.
+- Rebase and merge strategy was used.
+- Main branch protection rules were enabled to prevent direct pushes.
 
 ---
 
-## Known Limitations
+# GitHub Workflow Examples
 
-*This section will be updated after testing the completed application.*
-
----
-
-## Future Improvements
-
-Potential future enhancements include:
-
-- User authentication and authorization
-- Budget notifications and alerts
-- Export transactions as CSV or PDF
-- Advanced search and filtering
-- Improved financial reports and analytics
-- Additional dashboard visualizations
-- Mobile responsiveness enhancements
+| Task | Issue | Branch | Pull Request |
+|---|---|---|---|
+| Database Schema | #16 | issue-16-database-schema | PR #32 |
+| README Documentation | #15 | issue-15-readme | PR #33 |
+| Testing | #31 | issue-31-testing | PR #34 |
 
 ---
 
-## License
+# Testing
 
-This project was developed as part of **Assignment 3** for the **CODOC (PRIVATE) LIMITED Intern Development Programme**.
+Testing was performed to verify application functionality.
+
+The following areas were tested:
+
+- Transaction CRUD operations
+- Database persistence
+- REST API endpoints
+- API responses
+- Error handling
+- Frontend functionality
+
+Testing was performed manually using API requests and application checks.
+
+Any bugs identified during testing were tracked through GitHub Issues.
 
 ---
 
-## Acknowledgements
+# Known Limitations
+
+- Authentication and authorization were not completed due to time constraints.
+- Dashboard analytics were not implemented.
+- Budget management features remain incomplete.
+- Search and filtering functionality requires further development.
+- Automated testing was not added.
+
+---
+
+# Future Improvements
+
+Potential future improvements include:
+
+- Complete user authentication system
+- Add transaction search and filtering
+- Implement budget tracking features
+- Add budget exceeded alerts
+- Create financial dashboards and analytics
+- Export transactions as CSV/PDF
+- Add automated testing
+- Improve mobile responsiveness
+
+---
+
+# License
+
+This project was developed as part of **Assignment 3 — Mini Web Application with Database** for the **CODOC (PRIVATE) LIMITED Intern Development Programme**.
+
+---
+
+# Acknowledgements
 
 Developed collaboratively by the Expense & Budget Tracker team as part of the CODOC (PRIVATE) LIMITED Intern Development Programme.
