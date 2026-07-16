@@ -2,17 +2,27 @@ import { useState } from "react";
 import { Link, useNavigate } from "react-router";
 import { Mail, Lock, Eye, EyeOff, ArrowRight } from "lucide-react";
 
+import { login } from "../services/api";
+
 export default function Login() {
-  const [email, setEmail] = useState("salman@expensetrack.app");
-  const [password, setPassword] = useState("password123");
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
   const [showPw, setShowPw] = useState(false);
   const [loading, setLoading] = useState(false);
+  const [error, setError] = useState("");
   const navigate = useNavigate();
 
-  function handleSubmit(e: React.FormEvent) {
+  async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
     setLoading(true);
-    setTimeout(() => navigate("/"), 1200);
+    setError("");
+    try {
+      await login({ email, password });
+      navigate("/");
+    } catch (err: any) {
+      setError(err.message || "Failed to login");
+      setLoading(false);
+    }
   }
 
   return (
@@ -35,6 +45,12 @@ export default function Login() {
         <span className="text-slate-600 text-xs font-medium">or continue with email</span>
         <div className="flex-1 h-px bg-white/[0.06]" />
       </div>
+
+      {error && (
+        <div className="mb-4 bg-red-500/10 border border-red-500/20 rounded-xl p-3 text-red-400 text-sm">
+          {error}
+        </div>
+      )}
 
       <form onSubmit={handleSubmit} className="space-y-4">
         <div>

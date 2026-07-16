@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Outlet, NavLink, useNavigate } from "react-router";
 import {
   LayoutDashboard, ArrowLeftRight, TrendingUp, TrendingDown,
@@ -21,6 +21,8 @@ const bottomNav = [
   { path: "/settings", label: "Settings", icon: Settings },
 ];
 
+import { getCategories, addTransaction, type Category } from "../services/api";
+
 const notifications = [
   { id: 1, text: "Budget limit reached for Shopping", time: "2m ago", read: false, type: "warning" },
   { id: 2, text: "Salary credited — $8,500.00", time: "1h ago", read: false, type: "success" },
@@ -28,7 +30,7 @@ const notifications = [
   { id: 4, text: "Savings goal 80% achieved!", time: "1d ago", read: true, type: "success" },
 ];
 
-type ModalField = { name: string; category: string; amount: string; type: "income" | "expense"; date: string; note: string };
+type ModalField = { name: string; category_id: string; amount: string; type: "income" | "expense"; date: string; note: string };
 
 export default function AppLayout() {
   const [collapsed, setCollapsed] = useState(false);
@@ -37,20 +39,41 @@ export default function AppLayout() {
   const [showProfile, setShowProfile] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
   const [notifList, setNotifList] = useState(notifications);
-  const [form, setForm] = useState<ModalField>({ name: "", category: "Food & Dining", amount: "", type: "expense", date: new Date().toISOString().split("T")[0], note: "" });
+  const [form, setForm] = useState<ModalField>({ name: "", category_id: "", amount: "", type: "expense", date: new Date().toISOString().split("T")[0], note: "" });
   const [submitted, setSubmitted] = useState(false);
+  const [categories, setCategories] = useState<Category[]>([]);
   const navigate = useNavigate();
 
   const unread = notifList.filter(n => !n.read).length;
+
+  useEffect(() => {
+    getCategories().then(setCategories).catch(console.error);
+  }, []);
 
   function markAllRead() {
     setNotifList(notifList.map(n => ({ ...n, read: true })));
   }
 
-  function handleSubmit(e: React.FormEvent) {
+  async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
-    setSubmitted(true);
-    setTimeout(() => { setSubmitted(false); setShowAddModal(false); setForm({ name: "", category: "Food & Dining", amount: "", type: "expense", date: new Date().toISOString().split("T")[0], note: "" }); }, 1500);
+    try {
+      await addTransaction({
+        description: form.name,
+        amount: form.type === "expense" ? -Number(form.amount) : Number(form.amount),
+        category_id: Number(form.category_id),
+        date: form.date,
+        type: form.type === "expense" ? "Expense" : "Income"
+      });
+      setSubmitted(true);
+      setTimeout(() => { 
+        setSubmitted(false); 
+        setShowAddModal(false); 
+        setForm({ name: "", category_id: "", amount: "", type: "expense", date: new Date().toISOString().split("T")[0], note: "" }); 
+        window.location.reload(); // Refresh the page to show the new transaction
+      }, 1500);
+    } catch (err: any) {
+      alert("Failed to add transaction: " + err.message);
+    }
   }
 
   return (
@@ -312,9 +335,10 @@ export default function AppLayout() {
 
                   <div className="col-span-2">
                     <label className="block text-slate-400 text-xs font-medium mb-1.5">Category</label>
-                    <select value={form.category} onChange={e => setForm({ ...form, category: e.target.value })} className="w-full bg-white/[0.04] border border-white/[0.08] rounded-xl px-4 py-2.5 text-sm text-slate-200 focus:outline-none focus:ring-1 focus:ring-emerald-500/50 transition-all appearance-none">
-                      {["Food & Dining", "Housing", "Transport", "Entertainment", "Healthcare", "Shopping", "Utilities", "Education", "Salary", "Freelance", "Investment", "Other"].map(c => (
-                        <option key={c} value={c} className="bg-slate-800">{c}</option>
+                    <select required value={form.category_id} onChange={e => setForm({ ...form, category_id: e.target.value })} className="w-full bg-white/[0.04] border border-white/[0.08] rounded-xl px-4 py-2.5 text-sm text-slate-200 focus:outline-none focus:ring-1 focus:ring-emerald-500/50 transition-all appearance-none">
+                      <option value="" className="bg-slate-800">Select category...</option>
+                      {categories.map(c => (
+                        <option key={c.id} value={c.id} className="bg-slate-800">{c.name}</option>
                       ))}
                     </select>
                   </div>
